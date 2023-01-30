@@ -1,4 +1,5 @@
 using SDI.Interfaces;
+using SDI.Managers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace SDI.Objectives
 
             hasSwitched = true;
             hiddenSwitcheObjective.SwitchesOpened++;
+
+            ObjectiveManager.Instance.Switch("switch");
         }
     }
 }

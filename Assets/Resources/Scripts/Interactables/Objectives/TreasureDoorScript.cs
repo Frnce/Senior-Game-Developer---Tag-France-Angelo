@@ -12,9 +12,8 @@ namespace SDI.Objectives
         {
             if (FindObjectOfType<PlayerNetwork>().HasKey)
             {
-                gameObject.SetActive(false);
+                gameObject.SetActive(false) ;
             }
         }
     }
-
 }

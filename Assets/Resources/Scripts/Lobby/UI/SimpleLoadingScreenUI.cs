@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace SDI.UI
@@ -7,6 +8,7 @@ namespace SDI.UI
     public class SimpleLoadingScreenUI : MonoBehaviour
     {
         public static SimpleLoadingScreenUI Instance { get; private set; }
+
         private void Awake()
         {
             Instance = this;

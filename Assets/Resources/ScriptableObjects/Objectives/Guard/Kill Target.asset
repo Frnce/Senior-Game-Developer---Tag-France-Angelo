@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1422611213505284099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4acf1c5bd19ae63419550cfc2007bfdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requiredAmount: 1
+  objectiveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  target: Thief
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78789eaf181a4e746b269c8eca815db1, type: 3}
+  m_Name: Kill Target
+  m_EditorClassIdentifier: 
+  information:
+    name: Kill Thief
+    description: Find and kill the Thief
+  objectives:
+  - {fileID: -1422611213505284099}

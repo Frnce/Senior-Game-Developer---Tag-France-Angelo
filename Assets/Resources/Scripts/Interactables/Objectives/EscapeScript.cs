@@ -1,3 +1,4 @@
+using SDI.Managers;
 using SDI.Players;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +12,8 @@ namespace SDI.Objectives
         {
             if(collision.CompareTag("Player") && FindObjectOfType<PlayerNetwork>().HasTreasure)
             {
-                Debug.Log("THIEF WINS");
+                ObjectiveManager.Instance.Trigger("door", FindObjectOfType<PlayerNetwork>().HasTreasure);
+                Debug.Log(FindObjectOfType<PlayerNetwork>().HasTreasure);
             }
         }
     }

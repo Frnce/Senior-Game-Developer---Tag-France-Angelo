@@ -277,7 +277,9 @@ namespace SDI.Managers
                         Data = new Dictionary<string, DataObject> { { KEY_START_GAME, new DataObject(DataObject.VisibilityOptions.Member, relayCode) } }
                     });
 
-                    NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+                    LobbyInfo.Instance.maxPlayers.Value = joinedLobby.Players.Count;
+
+                    NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
                 }
                 catch (LobbyServiceException ex)
                 {
@@ -289,6 +291,10 @@ namespace SDI.Managers
         private void ShowLoadScreenClientRpc()
         {
             SimpleLoadingScreenUI.Instance.Show();
+        }
+        public int GetPlayersList()
+        {
+            return joinedLobby.Players.Count;
         }
     }
 }

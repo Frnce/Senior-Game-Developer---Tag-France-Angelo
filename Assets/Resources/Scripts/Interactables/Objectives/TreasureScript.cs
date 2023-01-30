@@ -1,4 +1,5 @@
 using SDI.Interfaces;
+using SDI.Managers;
 using SDI.Players;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace SDI.Objectives
 
             FindObjectOfType<PlayerNetwork>().HasTreasure = true;
             isOpened = true;
-            //Change Sprite to open
+            ObjectiveManager.Instance.Collect("treasure");
         }
 
     }

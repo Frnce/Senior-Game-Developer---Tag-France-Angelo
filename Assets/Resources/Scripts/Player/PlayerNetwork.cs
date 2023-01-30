@@ -1,5 +1,6 @@
 using SDI.Enums;
 using SDI.Interfaces;
+using SDI.Managers;
 using SDI.Utils;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,12 +9,13 @@ using UnityEngine;
 
 namespace SDI.Players
 {
-    public class PlayerNetwork : NetworkBehaviour,IDamageable
+    [RequireComponent(typeof(Rigidbody2D))][RequireComponent(typeof(PlayerController))]
+    public class PlayerNetwork : NetworkBehaviour, IDamageable
     {
+        [Header("Charater Stats")]
         [SerializeField]
         private float movementSpeed = 10f;
-        [SerializeField]
-        private int maxHealth = 5;
+        [Header("Projectile Setting")]
         [SerializeField]
         private GameObject arrowObject;
         [SerializeField]
@@ -25,16 +27,13 @@ namespace SDI.Players
         [SerializeField]
         private SpriteRenderer spriteRenderer;
 
-        private Roles role;
         private PlayerController playerController;
         private Rigidbody2D rb2d;
         private Vector3 playerDir;
 
         private Vector3 mouse;
-        private float mouseAngle;
-        private Vector2 mouseVector;
-
-        private int currentHealth;
+        private NetworkVariable<float> mouseAngle = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        private NetworkVariable<Vector2> mouseVector = new NetworkVariable<Vector2>(new Vector2(), NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         private Shader hitShader;
         private Shader defaultShader;
@@ -47,21 +46,18 @@ namespace SDI.Players
         {
             playerController = GetComponent<PlayerController>();
             rb2d = GetComponent<Rigidbody2D>();
-
-            currentHealth = maxHealth;
-
             hitShader = Shader.Find("GUI/Text Shader");
             defaultShader = Shader.Find("Sprites/Default");
         }
         void Update()
         {
-            if (!IsOwner) return; 
+            if (!IsOwner) return;
 
             playerDir = playerController.Movement;
             Aim();
             if (playerController.AcceptKey)
             {
-                Shoot();
+                ShootServerRpc();
             }
         }
         private void FixedUpdate()
@@ -78,28 +74,33 @@ namespace SDI.Players
             mouse = Camera.main.ScreenToWorldPoint(playerController.MousePosition);
             mouse.z = Camera.main.nearClipPlane;
 
-            mouseVector = (mouse - transform.position).normalized;
-            float gunAngle = Mathf.Atan2(mouseVector.y, mouseVector.x) * Mathf.Rad2Deg - 90f;
-            mouseAngle = gunAngle;
-            arm.transform.rotation = Quaternion.AngleAxis(mouseAngle, Vector3.forward);
+            mouseVector.Value = (mouse - transform.position).normalized;
+            float gunAngle = Mathf.Atan2(mouseVector.Value.y, mouseVector.Value.x) * Mathf.Rad2Deg - 90f;
+            mouseAngle.Value = gunAngle;
+            arm.transform.rotation = Quaternion.AngleAxis(mouseAngle.Value, Vector3.forward);
         }
-        private void Shoot()
+        [ServerRpc]
+        private void ShootServerRpc()
         {
             AmmoScript arrow = Instantiate(arrowObject, bowTip.position, Quaternion.identity).GetComponent<AmmoScript>();
-            arrow.Setup(mouseVector, mouseAngle, arrowSpeed);
+
+            arrow.GetComponent<NetworkObject>().Spawn();
+            arrow.Setup(mouseVector.Value, arrowSpeed, mouseAngle.Value);
         }
 
         public void OnHit()
         {
-            currentHealth--;
-            DamageEffect();
-            if (currentHealth <= 0)
-            {
-                GetComponent<NetworkObject>().Despawn(true);
-                Destroy(gameObject);
-            }
+            DamageEffectClientRpc();
+            DefeatServerRpc();
         }
-        private void DamageEffect()
+        [ServerRpc]
+        private void DefeatServerRpc()
+        {
+            GetComponent<NetworkObject>().Despawn();
+            Destroy(gameObject);
+        }
+        [ClientRpc]
+        private void DamageEffectClientRpc()
         {
             spriteRenderer.material.shader = hitShader;
             spriteRenderer.material.color = Color.white;
@@ -113,6 +114,14 @@ namespace SDI.Players
             }
             yield return new WaitForSeconds(0.1f);
             spriteRenderer.material.shader = defaultShader;
+        }
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+            if (GetComponent<PlayerRole>().roles.Value == Enums.Roles.THIEF)
+            {
+                ObjectiveManager.Instance.Kill("Thief");
+            }
         }
         private void OnTriggerStay2D(Collider2D collision)
         {

@@ -6,7 +6,7 @@ namespace SDI.Enums
 {
     public enum Roles
     {
-        TREASUREHUNTER,
+        GUARD,
         THIEF
     }
 }
